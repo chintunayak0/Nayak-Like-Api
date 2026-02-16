@@ -11,21 +11,20 @@ app = Flask(__name__)
 
 def load_tokens(server):
     files = FILES
-    return json.load(open(f"tokens/{files.get(server,'token_bd.json')}"))
+    return json.load(open(f"tokens/{files.get(server,'token_ind.json')}"))
 
 def get_headers(token):
     return {
-            "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 9; ASUS_Z01QD Build/PI)",
-            "Connection": "Keep-Alive",
-            "Accept-Encoding": "gzip",
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Expect": "100-continue",
-            "X-Unity-Version": "2018.4.11f1",
-            "X-GA": "v1 1",
-            "ReleaseVersion": "OB51",
-        }
-
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 13; SM-G991B Build/TP1A.220624.014)",
+        "Connection": "Keep-Alive",
+        "Accept-Encoding": "gzip",
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Expect": "100-continue",
+        "X-Unity-Version": "2021.3.18f1",
+        "X-GA": "v1 1",
+        "ReleaseVersion": "OB52",
+    }
 def encrypt_message(data):
     cipher = AES.new(b'Yg&tc%DEuh6%Zc^8', AES.MODE_CBC, b'6oyZDr22E3ychjM%')
     return binascii.hexlify(cipher.encrypt(pad(data, AES.block_size))).decode()
@@ -50,7 +49,7 @@ async def multi(uid, server, url):
 
 def get_info(enc, server, token):
     urls =URLS_INFO
-    r = requests.post(urls.get(server,"https://clientbp.ggblueshark.com/GetPlayerPersonalShow"),
+    r = requests.post(urls.get(server,"https://loginbp.ggpolarbear.com/GetPlayerPersonalShow"),
                       data=bytes.fromhex(enc), headers=get_headers(token), verify=False)
     try: p = like_count_pb2.Info(); p.ParseFromString(r.content); return p
     except DecodeError: return None
@@ -67,34 +66,17 @@ def like():
     if not before: return jsonify(error="Player not found"),500
     before_like = int(json.loads(MessageToJson(before)).get('AccountInfo',{}).get('Likes',0))
     urls =URLS_LIKE
-    asyncio.run(multi(uid, server, urls.get(server,"https://clientbp.ggblueshark.com/LikeProfile")))
+    asyncio.run(multi(uid, server, urls.get(server,"https://loginbp.ggpolarbear.com/LikeProfile")))
     after = json.loads(MessageToJson(get_info(enc, server, tok)))
     after_like = int(after.get('AccountInfo',{}).get('Likes',0))
     return jsonify({
-        
-        
-        "credits":"great.thug4ff.com",
-        "likes_added": after_like - before_like,
-        "likes_before": before_like,
-        "likes_after": after_like,
-        "player": after.get('AccountInfo',{}).get('PlayerNickname',''),
-        "uid": after.get('AccountInfo',{}).get('UID',0),
-        "status": 1 if after_like-before_like else 2,
-        
-       
-    })
+    "status": 1 if after_like - before_like else 0,
+    "LikesGivenByAPI": after_like - before_like,
+    "LikesbeforeCommand": before_like,
+    "LikesafterCommand": after_like,
+    "PlayerNickname": after.get('AccountInfo',{}).get('PlayerNickname',''),
+    "UID": after.get('AccountInfo',{}).get('UID',0),
+})
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)
-
-
-
-
-
-
-
-
-
-    
-#URL_ENPOINTS ="http://127.0.0.1:5000/like?uid=13002831333&server=me"
-#credits : "https://great.thug4ff.com/"
