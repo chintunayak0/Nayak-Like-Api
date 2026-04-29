@@ -23,7 +23,7 @@ def get_headers(token):
         "Expect": "100-continue",
         "X-Unity-Version": "2021.3.18f1",
         "X-GA": "v1 1",
-        "ReleaseVersion": "OB52",
+        "ReleaseVersion": "OB53",
     }
 def encrypt_message(data):
     cipher = AES.new(b'Yg&tc%DEuh6%Zc^8', AES.MODE_CBC, b'6oyZDr22E3ychjM%')
